@@ -1,24 +1,25 @@
-﻿
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="Register.aspx.vb" Inherits="InventoryManagementSystem.Register" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="Register.aspx.vb" Inherits="InventoryManagementSystem.Register" %>
 
 <!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
 <head runat="server">
+
     <meta charset="utf-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Register - Inventory Management System</title>
+    <title>Register - Inventory</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <!-- Poppins Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -42,13 +43,6 @@
             border-radius: 22px;
             padding: 35px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-        }
-
-        .logo {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
-            margin-bottom: 15px;
         }
 
         .brand-title {
@@ -116,36 +110,27 @@
                 padding: 25px 20px;
             }
         }
+
     </style>
+
 </head>
 
 <body>
     <form id="form1" runat="server">
 
         <div class="register-container">
+
             <div class="card register-card">
 
                 <!-- Company Logo and Heading -->
                 <div class="text-center mb-4">
-
-                    <img src="Images/logo.png"
-                         alt="Company Logo"
-                         class="logo" />
-
-                    <h2 class="brand-title">Create Account</h2>
-
-                    <p class="brand-subtitle mb-0">
-                        Register to access your inventory system.
-                    </p>
-
+                    <h2 class="brand-title"> Create Account </h2>
+                    <p class="brand-subtitle mb-0"> Register to access your inventory management </p>
                 </div>
 
                 <!-- Full Name -->
                 <div class="mb-3">
-                    <label for="txtFullName" class="form-label">
-                        Full Name
-                    </label>
-
+                    <label for="txtFullName" class="form-label"> Full Name </label>
                     <asp:TextBox
                         ID="txtFullName"
                         runat="server"
@@ -155,10 +140,7 @@
 
                 <!-- Email -->
                 <div class="mb-3">
-                    <label for="txtEmail" class="form-label">
-                        Email Address
-                    </label>
-
+                    <label for="txtEmail" class="form-label"> Email Address </label>
                     <asp:TextBox
                         ID="txtEmail"
                         runat="server"
@@ -169,10 +151,7 @@
 
                 <!-- Password -->
                 <div class="mb-3">
-                    <label for="txtPassword" class="form-label">
-                        Password
-                    </label>
-
+                    <label for="txtPassword" class="form-label"> Password </label>
                     <asp:TextBox
                         ID="txtPassword"
                         runat="server"
@@ -196,23 +175,20 @@
                     CssClass="d-block mt-3 text-center" />
 
                 <!-- Login Link -->
-                <p class="text-center mt-4 mb-0">
-                    Already have an account?
-                    <a href="Login.aspx" class="login-link">
-                        Sign in
-                    </a>
+                <p class="text-center mt-4 mb-0"> Already have an account?
+                    <a href="Login.aspx" class="login-link"> Sign in </a>
                 </p>
 
                 <!-- Footer -->
                 <div class="text-center mt-4">
-                    <span class="footer-text">
-                        Powered By :: Automation & System, KDS Logistics Ltd.
-                    </span>
+                    <span class="footer-text"> Powered By :: Automation & System, KDS Logistics Ltd. </span>
                 </div>
 
             </div>
+
         </div>
 
     </form>
 </body>
+
 </html>
