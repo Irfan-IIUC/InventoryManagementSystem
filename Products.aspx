@@ -114,7 +114,62 @@
                 </div>
             </div>
 
+
+            
+<asp:Panel ID="pnlEditProduct" runat="server"
+    Visible="False"
+    CssClass="content-card mb-4">
+
+    <h4 class="mb-3">Edit Product</h4>
+
+    <asp:HiddenField ID="hfEditProductID" runat="server" />
+
+    <div class="row g-3">
+
+        <div class="col-md-6">
+            <label class="form-label">Product Code</label>
+            <asp:TextBox ID="txtEditProductCode" runat="server"
+                CssClass="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Product Name</label>
+            <asp:TextBox ID="txtEditProductName" runat="server"
+                CssClass="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Price</label>
+            <asp:TextBox ID="txtEditPrice" runat="server"
+                CssClass="form-control" TextMode="Number" />
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Stock Quantity</label>
+            <asp:TextBox ID="txtEditStock" runat="server"
+                CssClass="form-control" TextMode="Number" />
+        </div>
+
+        <div class="col-12">
+            <asp:Button ID="btnUpdateProduct" runat="server"
+                Text="Update Product"
+                CssClass="btn btn-success" />
+
+            <asp:Button ID="btnCancelEdit" runat="server"
+                Text="Cancel"
+                CssClass="btn btn-secondary ms-2"
+                CausesValidation="False" />
+        </div>
+
+    </div>
+
+</asp:Panel>
+
+
+
+
             <div class="content-card">
+
                 <h4 class="mb-3">Product List</h4>
 
                 <div class="table-responsive">
@@ -140,9 +195,38 @@
                             <asp:BoundField DataField="StockQuantity"
                                 HeaderText="Stock Quantity" />
 
+                            
+                            <asp:BoundField DataField="MinimumStock"
+                                HeaderText="Minimum Stock" />
+
+
                             <asp:BoundField DataField="TotalValue"
                                 HeaderText="Total Value (৳)"
                                 DataFormatString="{0:N2}" />
+
+                            
+<asp:TemplateField HeaderText="Actions">
+    <ItemTemplate>
+        <asp:Button
+            ID="btnEdit"
+            runat="server"
+            Text="Edit"
+            CssClass="btn btn-sm btn-primary"
+            CommandName="EditProduct"
+            CommandArgument='<%# Eval("ProductID") %>' />
+
+        <asp:Button
+            ID="btnDelete"
+            runat="server"
+            Text="Delete"
+            CssClass="btn btn-sm btn-danger"
+            CommandName="DeleteProduct"
+            CommandArgument='<%# Eval("ProductID") %>'
+            OnClientClick="return confirm('Are you sure you want to delete this product?');" />
+    </ItemTemplate>
+</asp:TemplateField>
+
+
                         </Columns>
 
                         <HeaderStyle CssClass="table-dark" />

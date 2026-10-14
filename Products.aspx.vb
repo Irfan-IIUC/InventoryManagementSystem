@@ -9,6 +9,91 @@ Public Class Products
     Inherits System.Web.UI.Page
 
 
+
+    Protected Sub gvProducts_RowCommand(
+    sender As Object,
+    e As GridViewCommandEventArgs
+) Handles gvProducts.RowCommand
+
+        Dim productID As Integer = Convert.ToInt32(e.CommandArgument)
+
+        If e.CommandName = "DeleteProduct" Then
+
+            Dim cs As String =
+            ConfigurationManager.ConnectionStrings("InventoryDB").ConnectionString
+
+            Try
+                Using con As New SqlConnection(cs)
+
+                    Dim query As String =
+                    "DELETE FROM dbo.Products WHERE ProductID = @ProductID"
+
+                    Using cmd As New SqlCommand(query, con)
+
+                        cmd.Parameters.AddWithValue("@ProductID", productID)
+
+                        con.Open()
+                        Dim rowsAffected As Integer = cmd.ExecuteNonQuery()
+
+                        If rowsAffected > 0 Then
+                            ClientScript.RegisterStartupScript(
+                            Me.GetType(), "msg",
+                            "alert('Product deleted successfully!');", True)
+                        End If
+
+                    End Using
+                End Using
+
+                LoadProducts()
+
+            Catch ex As Exception
+
+                ClientScript.RegisterStartupScript(
+                Me.GetType(), "msg",
+                "alert('Unable to delete product. Please try again.');", True)
+
+            End Try
+
+        ElseIf e.CommandName = "EditProduct" Then
+
+            Dim cs As String =
+        ConfigurationManager.ConnectionStrings("InventoryDB").ConnectionString
+
+            Using con As New SqlConnection(cs)
+
+                Dim query As String =
+                    "SELECT ProductID, ProductCode, ProductName, Price, StockQuantity " &
+                    "FROM dbo.Products WHERE ProductID = @ProductID"
+
+                Using cmd As New SqlCommand(query, con)
+
+                    cmd.Parameters.AddWithValue("@ProductID", productID)
+
+                    con.Open()
+
+                    Using reader As SqlDataReader = cmd.ExecuteReader()
+
+                        If reader.Read() Then
+
+                            hfEditProductID.Value = reader("ProductID").ToString()
+                            txtEditProductCode.Text = reader("ProductCode").ToString()
+                            txtEditProductName.Text = reader("ProductName").ToString()
+                            txtEditPrice.Text = reader("Price").ToString()
+                            txtEditStock.Text = reader("StockQuantity").ToString()
+
+                            pnlEditProduct.Visible = True
+
+                        End If
+
+                    End Using
+                End Using
+            End Using
+
+        End If
+
+    End Sub
+
+
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         If Not IsPostBack Then
@@ -24,10 +109,12 @@ Public Class Products
         Using con As New SqlConnection(cs)
 
 
+
             Dim query As String =
-    "SELECT ProductCode, ProductName, Price, StockQuantity, " &
+    "SELECT ProductID, ProductCode, ProductName, Price, StockQuantity, " &
     "(Price * StockQuantity) AS TotalValue, MinimumStock " &
     "FROM dbo.Products ORDER BY ProductID DESC"
+
 
 
             Using cmd As New SqlCommand(query, con)
@@ -154,5 +241,116 @@ Public Class Products
         End Try
 
     End Sub
+
+
+
+    Protected Sub btnUpdateProduct_Click(
+    sender As Object,
+    e As EventArgs
+) Handles btnUpdateProduct.Click
+
+        Dim productID As Integer
+        Dim price As Decimal
+        Dim stock As Integer
+
+        If Not Integer.TryParse(hfEditProductID.Value, productID) Then
+            Return
+        End If
+
+        If txtEditProductCode.Text.Trim() = "" OrElse
+       txtEditProductName.Text.Trim() = "" Then
+
+            ClientScript.RegisterStartupScript(
+            Me.GetType(), "msg",
+            "alert('Product code and name are required.');", True)
+            Return
+        End If
+
+        If Not Decimal.TryParse(txtEditPrice.Text, price) OrElse price < 0 Then
+            ClientScript.RegisterStartupScript(
+            Me.GetType(), "msg",
+            "alert('Enter a valid non-negative price.');", True)
+            Return
+        End If
+
+        If Not Integer.TryParse(txtEditStock.Text, stock) OrElse stock < 0 Then
+            ClientScript.RegisterStartupScript(
+            Me.GetType(), "msg",
+            "alert('Stock must be a non-negative whole number.');", True)
+            Return
+        End If
+
+        Dim cs As String =
+        ConfigurationManager.ConnectionStrings("InventoryDB").ConnectionString
+
+        Try
+            Using con As New SqlConnection(cs)
+
+                Dim query As String =
+                "UPDATE dbo.Products SET ProductCode = @ProductCode, " &
+                "ProductName = @ProductName, Price = @Price, " &
+                "StockQuantity = @StockQuantity " &
+                "WHERE ProductID = @ProductID"
+
+                Using cmd As New SqlCommand(query, con)
+
+                    cmd.Parameters.AddWithValue(
+                    "@ProductCode", txtEditProductCode.Text.Trim())
+
+                    cmd.Parameters.AddWithValue(
+                    "@ProductName", txtEditProductName.Text.Trim())
+
+                    cmd.Parameters.AddWithValue("@Price", price)
+                    cmd.Parameters.AddWithValue("@StockQuantity", stock)
+                    cmd.Parameters.AddWithValue("@ProductID", productID)
+
+                    con.Open()
+                    cmd.ExecuteNonQuery()
+
+                End Using
+            End Using
+
+            pnlEditProduct.Visible = False
+            LoadProducts()
+
+            ClientScript.RegisterStartupScript(
+            Me.GetType(), "msg",
+            "alert('Product updated successfully!');", True)
+
+        Catch ex As SqlException
+            If ex.Number = 2601 OrElse ex.Number = 2627 Then
+                ClientScript.RegisterStartupScript(
+                Me.GetType(), "msg",
+                "alert('This product code already exists.');", True)
+            Else
+                ClientScript.RegisterStartupScript(
+                Me.GetType(), "msg",
+                "alert('Database error while updating product.');", True)
+            End If
+
+        Catch ex As Exception
+            ClientScript.RegisterStartupScript(
+            Me.GetType(), "msg",
+            "alert('Unable to update product. Please try again.');", True)
+        End Try
+
+    End Sub
+
+
+    Protected Sub btnCancelEdit_Click(
+    sender As Object,
+    e As EventArgs
+) Handles btnCancelEdit.Click
+
+        pnlEditProduct.Visible = False
+
+        hfEditProductID.Value = ""
+        txtEditProductCode.Text = ""
+        txtEditProductName.Text = ""
+        txtEditPrice.Text = ""
+        txtEditStock.Text = ""
+
+    End Sub
+
 
 End Class
