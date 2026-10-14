@@ -9,6 +9,18 @@ Public Class Products
     Inherits System.Web.UI.Page
 
 
+    Protected Sub Page_Init(
+        sender As Object,
+        e As EventArgs
+    ) Handles Me.Init
+
+        If Session("UserEmail") Is Nothing Then
+            Response.Redirect("Login.aspx", False)
+            Context.ApplicationInstance.CompleteRequest()
+        End If
+
+    End Sub
+
 
     Protected Sub gvProducts_RowCommand(
     sender As Object,
@@ -351,6 +363,21 @@ Public Class Products
         txtEditStock.Text = ""
 
     End Sub
+
+
+
+    Protected Sub btnLogout_Click(
+    sender As Object,
+    e As EventArgs
+) Handles btnLogout.Click
+
+        Session.Clear()
+        Session.Abandon()
+
+        Response.Redirect("Login.aspx")
+
+    End Sub
+
 
 
 End Class
