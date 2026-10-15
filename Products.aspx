@@ -283,10 +283,20 @@
 
                 </div>
 
-                <!-- Server-side button for logging out; its click event is handled in Products.aspx.vb -->
-                <asp:Button ID="btnLogout" runat="server"
-                    Text="Logout"
-                    CssClass="btn btn-light px-4" />
+                <!-- Navigation actions: Purchase & Sales and Logout buttons aligned to the right -->
+                <div class="d-flex justify-content-end align-items-center gap-2">
+
+                    <!-- Navigate to the Purchase and Sales Management page -->
+                    <a href="Transactions.aspx" class="btn btn-warning">
+                        Purchase &amp; Sales
+                    </a>
+
+                    <!-- Server-side button for logging out; its click event is handled in Products.aspx.vb -->
+                    <asp:Button ID="btnLogout" runat="server"
+                        Text="Logout"
+                        CssClass="btn btn-light px-4" />
+
+                </div>
 
             </div>
 
