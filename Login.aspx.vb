@@ -45,9 +45,10 @@ Public Class Login
             ' Using automatically releases the connection when finished.
             Using con As New SqlConnection(cs)
 
-                ' SQL query that counts users matching the entered email and password.
+                ' Retrieve the UserID of the user matching the email and password.
                 Dim query As String =
-                    "SELECT COUNT(*) FROM Users WHERE Email = @Email AND PasswordHash = @PasswordHash"
+                    "SELECT UserID FROM dbo.Users " &
+                    "WHERE Email = @Email AND PasswordHash = @PasswordHash"
 
                 ' Create a SQL command using the query and connection.
                 Using cmd As New SqlCommand(query, con)
@@ -61,19 +62,22 @@ Public Class Login
                     ' Open the database connection.
                     con.Open()
 
-                    ' Execute the query and get the number of matching users.
-                    ' Convert the returned value into an Integer.
-                    Dim count As Integer = Convert.ToInt32(cmd.ExecuteScalar())
+                    ' Execute the query and retrieve the matching UserID.
+                    Dim result As Object = cmd.ExecuteScalar()
 
-                    ' If at least one matching user exists, login is successful.
-                    If count > 0 Then
+                    ' Check whether a matching user was found.
+                    If result IsNot Nothing AndAlso result IsNot DBNull.Value Then
+
+                        ' Convert the retrieved UserID into an Integer.
+                        Dim userID As Integer = Convert.ToInt32(result)
+
+                        ' Store the user's ID in the current session.
+                        Session("UserID") = userID
 
                         ' Store the user's email in the current session.
-                        ' This can be used to identify the logged-in user.
                         Session("UserEmail") = email
 
                         ' Redirect the user to Products.aspx.
-                        ' False means do not immediately terminate the current page thread.
                         Response.Redirect("Products.aspx", False)
 
                         ' Complete the current ASP.NET request safely.
@@ -86,19 +90,15 @@ Public Class Login
 
                     End If
 
-                    ' Dispose of the SQL command.
                 End Using
 
-                ' Dispose of the database connection.
             End Using
 
-            ' Handle unexpected errors during login.
         Catch ex As Exception
 
             ' Display a general error message.
             lblMessage.Text = "Login failed. Please try again."
 
-            ' Finish error handling.
         End Try
 
         ' End of the Login button click event.
