@@ -19,17 +19,12 @@ Public Class Transactions
     Inherits System.Web.UI.Page
 
     ' Get the SQL Server connection string from Web.config.
-    Private ReadOnly connectionString As String =
-        ConfigurationManager.ConnectionStrings("InventoryDB").ConnectionString
+    Private ReadOnly connectionString As String = ConfigurationManager.ConnectionStrings("InventoryDB").ConnectionString
 
     ' Check whether the user is logged in before initializing the page.
-    Protected Sub Page_Init(
-        sender As Object,
-        e As EventArgs
-    ) Handles Me.Init
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
 
-        If Session("UserEmail") Is Nothing OrElse
-           Session("UserID") Is Nothing Then
+        If Session("UserEmail") Is Nothing OrElse Session("UserID") Is Nothing Then
 
             Response.Redirect("Login.aspx", False)
             Context.ApplicationInstance.CompleteRequest()
@@ -40,10 +35,7 @@ Public Class Transactions
     End Sub
 
     ' Load products and transaction history when the page first opens.
-    Protected Sub Page_Load(
-        sender As Object,
-        e As EventArgs
-    ) Handles Me.Load
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
 
         If Not IsPostBack Then
             LoadProducts()
@@ -57,9 +49,7 @@ Public Class Transactions
 
         Using con As New SqlConnection(connectionString)
 
-            Dim query As String =
-                "SELECT ProductID, ProductCode, ProductName " &
-                "FROM dbo.Products ORDER BY ProductName"
+            Dim query As String = "SELECT ProductID, ProductCode, ProductName FROM dbo.Products ORDER BY ProductName"
 
             Using cmd As New SqlCommand(query, con)
 
@@ -79,10 +69,7 @@ Public Class Transactions
         End Using
 
         ' Add a default selection at the beginning of the dropdown.
-        ddlProduct.Items.Insert(
-            0,
-            New ListItem("Select a Product", "")
-        )
+        ddlProduct.Items.Insert(0, New ListItem("Select a Product", ""))
 
     End Sub
 
