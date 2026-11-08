@@ -151,6 +151,7 @@
     <Content Include="Content\Login.css" />
     <Content Include="Products.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="Content\Register.css" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
