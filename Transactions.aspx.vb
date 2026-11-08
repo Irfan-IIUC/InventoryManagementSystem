@@ -78,14 +78,8 @@ Public Class Transactions
 
         Using con As New SqlConnection(connectionString)
 
-            Dim query As String =
-                "SELECT T.TransactionID, P.ProductName, " &
-                "T.TransactionType, T.Quantity, T.UnitPrice, " &
-                "T.TransactionDate " &
-                "FROM dbo.InventoryTransactions T " &
-                "INNER JOIN dbo.Products P " &
-                "ON T.ProductID = P.ProductID " &
-                "ORDER BY T.TransactionID DESC"
+            Dim query As String = "SELECT T.TransactionID, P.ProductName, T.TransactionType, T.Quantity, T.UnitPrice, T.TransactionDate " &
+                "FROM dbo.InventoryTransactions T INNER JOIN dbo.Products P ON T.ProductID = P.ProductID ORDER BY T.TransactionID DESC"
 
             Using cmd As New SqlCommand(query, con)
 
@@ -106,10 +100,7 @@ Public Class Transactions
     End Sub
 
     ' Validate and save a purchase or sale transaction.
-    Protected Sub btnSaveTransaction_Click(
-        sender As Object,
-        e As EventArgs
-    ) Handles btnSaveTransaction.Click
+    Protected Sub btnSaveTransaction_Click(sender As Object, e As EventArgs) Handles btnSaveTransaction.Click
 
         ' Get the logged-in user's ID from the session.
         If Session("UserID") Is Nothing Then
@@ -118,14 +109,12 @@ Public Class Transactions
             Return
         End If
 
-        Dim userID As Integer =
-            Convert.ToInt32(Session("UserID"))
+        Dim userID As Integer = Convert.ToInt32(Session("UserID"))
 
         ' Validate the selected product.
         Dim productID As Integer
 
-        If Not Integer.TryParse(ddlProduct.SelectedValue, productID) _
-            OrElse productID <= 0 Then
+        If Not Integer.TryParse(ddlProduct.SelectedValue, productID) OrElse productID <= 0 Then
 
             lblMessage.Text = "Please select a product."
             lblMessage.CssClass = "d-block mb-3 text-danger"
@@ -134,8 +123,7 @@ Public Class Transactions
         End If
 
         ' Validate the transaction type.
-        Dim transactionType As String =
-            ddlTransactionType.SelectedValue
+        Dim transactionType As String = ddlTransactionType.SelectedValue
 
         If transactionType <> "Purchase" AndAlso
            transactionType <> "Sale" Then
@@ -149,8 +137,7 @@ Public Class Transactions
         ' Validate the transaction quantity.
         Dim quantity As Integer
 
-        If Not Integer.TryParse(txtQuantity.Text.Trim(), quantity) _
-            OrElse quantity <= 0 Then
+        If Not Integer.TryParse(txtQuantity.Text.Trim(), quantity) OrElse quantity <= 0 Then
 
             lblMessage.Text = "Quantity must be a positive whole number."
             lblMessage.CssClass = "d-block mb-3 text-danger"
@@ -161,12 +148,7 @@ Public Class Transactions
         ' Validate the unit price.
         Dim unitPrice As Decimal
 
-        If Not Decimal.TryParse(
-            txtUnitPrice.Text.Trim(),
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            unitPrice
-        ) OrElse unitPrice < 0D Then
+        If Not Decimal.TryParse(txtUnitPrice.Text.Trim(), NumberStyles.Number, CultureInfo.CurrentCulture, unitPrice) OrElse unitPrice < 0D Then
 
             lblMessage.Text = "Please enter a valid, non-negative unit price."
             lblMessage.CssClass = "d-block mb-3 text-danger"
@@ -180,46 +162,29 @@ Public Class Transactions
 
                 con.Open()
 
-                ' Start a database transaction so the stock update
-                ' and transaction record succeed or fail together.
-                Using dbTransaction As SqlTransaction =
-                    con.BeginTransaction()
+                ' Start a database transaction so the stock update and transaction record succeed or fail together.
+                Using dbTransaction As SqlTransaction = con.BeginTransaction()
 
                     Try
 
                         ' Lock the product row while checking and updating stock.
-                        Dim stockQuery As String =
-                            "SELECT StockQuantity " &
-                            "FROM dbo.Products WITH (UPDLOCK, ROWLOCK) " &
-                            "WHERE ProductID = @ProductID"
+                        Dim stockQuery As String = "SELECT StockQuantity FROM dbo.Products WITH (UPDLOCK, ROWLOCK) WHERE ProductID = @ProductID"
 
                         Dim currentStock As Integer
 
-                        Using stockCmd As New SqlCommand(
-                            stockQuery,
-                            con,
-                            dbTransaction
-                        )
+                        Using stockCmd As New SqlCommand(stockQuery, con, dbTransaction)
 
-                            stockCmd.Parameters.Add(
-                                "@ProductID",
-                                SqlDbType.Int
-                            ).Value = productID
+                            stockCmd.Parameters.Add("@ProductID", SqlDbType.Int).Value = productID
 
-                            Dim stockResult As Object =
-                                stockCmd.ExecuteScalar()
+                            Dim stockResult As Object = stockCmd.ExecuteScalar()
 
-                            If stockResult Is Nothing OrElse
-                               stockResult Is DBNull.Value Then
+                            If stockResult Is Nothing OrElse stockResult Is DBNull.Value Then
 
-                                Throw New InvalidOperationException(
-                                    "The selected product was not found."
-                                )
+                                Throw New InvalidOperationException("The selected product was not found.")
 
                             End If
 
-                            currentStock =
-                                Convert.ToInt32(stockResult)
+                            currentStock = Convert.ToInt32(stockResult)
 
                         End Using
 
@@ -230,11 +195,7 @@ Public Class Transactions
 
                             ' Prevent an integer overflow when adding stock.
                             If quantity > Integer.MaxValue - currentStock Then
-
-                                Throw New InvalidOperationException(
-                                    "The resulting stock quantity is too large."
-                                )
-
+                                Throw New InvalidOperationException("The resulting stock quantity is too large.")
                             End If
 
                             ' Purchases increase stock.
@@ -244,12 +205,7 @@ Public Class Transactions
 
                             ' Sales cannot exceed available stock.
                             If quantity > currentStock Then
-
-                                Throw New InvalidOperationException(
-                                    "Insufficient stock. Available quantity: " &
-                                    currentStock.ToString()
-                                )
-
+                                Throw New InvalidOperationException("Insufficient stock. Available quantity: " & currentStock.ToString())
                             End If
 
                             ' Sales decrease stock.
@@ -258,84 +214,38 @@ Public Class Transactions
                         End If
 
                         ' Update the product's stock quantity.
-                        Dim updateQuery As String =
-                            "UPDATE dbo.Products " &
-                            "SET StockQuantity = @StockQuantity " &
-                            "WHERE ProductID = @ProductID"
+                        Dim updateQuery As String = "UPDATE dbo.Products SET StockQuantity = @StockQuantity WHERE ProductID = @ProductID"
 
-                        Using updateCmd As New SqlCommand(
-                            updateQuery,
-                            con,
-                            dbTransaction
-                        )
+                        Using updateCmd As New SqlCommand(updateQuery, con, dbTransaction)
 
-                            updateCmd.Parameters.Add(
-                                "@StockQuantity",
-                                SqlDbType.Int
-                            ).Value = newStock
+                            updateCmd.Parameters.Add("@StockQuantity", SqlDbType.Int).Value = newStock
+                            updateCmd.Parameters.Add("@ProductID", SqlDbType.Int).Value = productID
 
-                            updateCmd.Parameters.Add(
-                                "@ProductID",
-                                SqlDbType.Int
-                            ).Value = productID
-
-                            Dim rowsUpdated As Integer =
-                                updateCmd.ExecuteNonQuery()
+                            Dim rowsUpdated As Integer = updateCmd.ExecuteNonQuery()
 
                             If rowsUpdated <> 1 Then
-                                Throw New InvalidOperationException(
-                                    "The product stock could not be updated."
-                                )
+                                Throw New InvalidOperationException("The product stock could not be updated.")
                             End If
 
                         End Using
 
-                        ' Insert the transaction history record.
-                        ' TransactionDate uses the database default.
-                        Dim insertQuery As String =
-                            "INSERT INTO dbo.InventoryTransactions " &
-                            "(ProductID, TransactionType, Quantity, " &
-                            "UnitPrice, UserID) " &
-                            "VALUES (@ProductID, @TransactionType, " &
-                            "@Quantity, @UnitPrice, @UserID)"
+                        ' Insert the transaction history record. TransactionDate uses the database default.
+                        Dim insertQuery As String = "INSERT INTO dbo.InventoryTransactions (ProductID, TransactionType, Quantity, " &
+                            "UnitPrice, UserID) VALUES (@ProductID, @TransactionType, @Quantity, @UnitPrice, @UserID)"
 
-                        Using insertCmd As New SqlCommand(
-                            insertQuery,
-                            con,
-                            dbTransaction
-                        )
+                        Using insertCmd As New SqlCommand(insertQuery, con, dbTransaction)
 
-                            insertCmd.Parameters.Add(
-                                "@ProductID",
-                                SqlDbType.Int
-                            ).Value = productID
+                            insertCmd.Parameters.Add("@ProductID", SqlDbType.Int).Value = productID
+                            insertCmd.Parameters.Add("@TransactionType", SqlDbType.NVarChar, 10).Value = transactionType
+                            insertCmd.Parameters.Add("@Quantity", SqlDbType.Int).Value = quantity
 
-                            insertCmd.Parameters.Add(
-                                "@TransactionType",
-                                SqlDbType.NVarChar,
-                                10
-                            ).Value = transactionType
-
-                            insertCmd.Parameters.Add(
-                                "@Quantity",
-                                SqlDbType.Int
-                            ).Value = quantity
-
-                            Dim priceParameter =
-                                insertCmd.Parameters.Add(
-                                    "@UnitPrice",
-                                    SqlDbType.Decimal
-                                )
+                            Dim priceParameter = insertCmd.Parameters.Add("@UnitPrice", SqlDbType.Decimal)
 
                             priceParameter.Precision = 18
                             priceParameter.Scale = 2
                             priceParameter.Value = unitPrice
 
-                            insertCmd.Parameters.Add(
-                                "@UserID",
-                                SqlDbType.Int
-                            ).Value = userID
-
+                            insertCmd.Parameters.Add("@UserID", SqlDbType.Int).Value = userID
                             insertCmd.ExecuteNonQuery()
 
                         End Using
@@ -345,8 +255,7 @@ Public Class Transactions
 
                     Catch
 
-                        ' Undo the stock update if anything failed
-                        ' before the transaction was committed.
+                        ' Undo the stock update if anything failed before the transaction was committed.
                         Try
                             dbTransaction.Rollback()
                         Catch
@@ -362,8 +271,7 @@ Public Class Transactions
             End Using
 
             ' Show a success message.
-            lblMessage.Text =
-                transactionType & " transaction saved successfully!"
+            lblMessage.Text = transactionType & " transaction saved successfully!"
 
             lblMessage.CssClass = "d-block mb-3 text-success"
 
@@ -386,9 +294,7 @@ Public Class Transactions
         Catch ex As Exception
 
             ' Show a general message for unexpected database errors.
-            lblMessage.Text =
-                "Transaction failed. Please check the database configuration and try again."
-
+            lblMessage.Text = "Transaction failed. Please check the database configuration and try again."
             lblMessage.CssClass = "d-block mb-3 text-danger"
 
         End Try
